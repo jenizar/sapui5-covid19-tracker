@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html><head>
+<meta name="description" content="UI5 table example with local JSON model" />
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='Content-Type' content='text/html;charset=UTF-8'/>
+ 
+  <title>Covid-19 Global Data</title>
+ 
+  <!-- Load UI5, select gold reflection theme and the "commons" and "table" control libraries -->
+  <script id='sap-ui-bootstrap' type='text/javascript'
+    src='https://sapui5.hana.ondemand.com/resources/sap-ui-core.js'
+    data-sap-ui-theme='sap_bluecrystal'
+    data-sap-ui-libs="sap.m, sap.ui.commons,sap.ui.ux3,sap.ui.table"
+    data-sap-ui-xx-bindingSyntax="complex"></script>
+ 
+<style type="text/css">
+h5 {text-align: right}
+h5 {display: block}
+</style>	
+ <script type="text/javascript">
+ 
+      // create a "json" Model
+ 
+ var url = 'https://corona-stats.online/?format=json';
+      var oModel = new sap.ui.model.json.JSONModel();
+ 
+      $.ajax({
+          url : url,
+          //jsonpCallback : 'getJSON',
+          //contentType : 'application/json',
+          //dataType : 'jsonp',
+          success : function(data, textStatus, jqXHR) {
+            alert("success");
+              oModel.setData(data);
+              sap.ui.getCore().setModel(oModel);
+              var today = new Date();
+              var dd = today.getDate();
+              var mm = today.getMonth()+1; //January is 0!
+              var yyyy = today.getFullYear();
+ 
+              if(dd<10) {
+               dd='0'+dd
+              } 
+ 
+              if(mm<10) {
+               mm='0'+mm
+              } 
+              today = dd+'/'+mm+'/'+yyyy;
+
+		var oAppHeader = new sap.ui.commons.ApplicationHeader("appHeader"); 
+ 
+		//configure the branding area
+		oAppHeader.setLogoSrc("Logo Brand");
+		oAppHeader.setLogoText("Data source: https://corona-stats.online/?format=json");
+ 
+		//configure the welcome area
+		oAppHeader.setDisplayWelcome(true);
+		oAppHeader.setUserName(today);    // today = dd+'/'+mm+'/'+yyyy
+ 
+		//configure the log off area
+		oAppHeader.setDisplayLogoff(true);
+            oAppHeader.placeAt("content");			  
+ 
+var oTable = new sap.ui.table.Table({
+  title : "Covid-19 Global Data",
+  selectionMode : sap.ui.table.SelectionMode.Single,
+  navigationMode : sap.ui.table.NavigationMode.Paginator,
+});
+ 
+//Define the columns and the control templates to be used
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "World"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "country"),
+  width : "100px"
+}));
+ 
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "Total Cases"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "confirmed"),
+  width : "100px"
+}));
+ 
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "New Cases"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "todayCases"),
+  width : "100px"
+}));
+ 
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "Total Deaths"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "deaths"),
+  width : "100px"
+}));
+
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "New Deaths"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "todayDeaths"),
+  width : "100px"
+}));
+
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "Recovered"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "recovered"),
+  width : "100px"
+}));
+
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "Active"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "active"),
+  width : "100px"
+}));
+
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "Critical"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "critical"),
+  width : "100px"
+}));
+  
+oTable.addColumn(new sap.ui.table.Column({
+  label : new sap.ui.commons.Label({
+    text : "Cases / 1M pop"
+  }),
+  template : new sap.ui.commons.TextView().bindProperty("text", "casesPerOneMillion"),
+  width : "125px"
+}));
+      //Image source null    
+     var oText = new sap.ui.commons.TextView({
+							text : "No Image",
+							visible : {
+
+								parts : [ "flag"],
+								formatter : function(src) {
+									console.log("+++++++++" + src);
+									return (src != "") ? false : true;
+								}
+
+							}
+						});
+
+						var oImage = new sap.ui.commons.Image({
+							src : "{countryInfo/flag}",
+							visible : {
+
+								parts : [ "flag"],
+								formatter : function(src) {
+								
+									return (src != "") ? true : false;
+								}
+
+							}
+						});
+var oLayout = new sap.ui.layout.HorizontalLayout("imageLayout",{content: [oText, oImage ]});
+						oTable.addColumn(new sap.ui.table.Column({
+							label : new sap.ui.commons.Label({
+								text : "Flag"
+							}),
+                                                        height: "15px",
+                                                        width: "315px",
+							template :oLayout,
+
+						}));   
+          
+          //Ends here
+
+
+     var aData = oModel.getProperty("/data");
+ 
+        oModel.setData({modelData: aData});
+    // create a JSONModel, fill in the data and bind the Table to this model
+    oTable.setModel(oModel);
+    oTable.bindRows("/modelData");
+ 
+    // finally place the Table into the UI
+    oTable.placeAt("content");
+ 
+          },
+ 
+          error: function(xhr, testStatus, error) {
+              console.log(testStatus);
+              console.log(xhr);
+              console.log(error);
+          }
+ 
+       });
+var today = new Date();
+var dd = today.getDate();
+var mm = today.getMonth()+1; //January is 0!
+var yyyy = today.getFullYear();
+ 
+if(dd<10) {
+    dd='0'+dd
+} 
+ 
+if(mm<10) {
+    mm='0'+mm
+} 
+today = dd+'/'+mm+'/'+yyyy;
+ // document.write("<h5>" + today + "</h5>");
+  </script>
+ 
+  </head>
+  <body class='sapUiBody'>
+    <div id='content'></div>
+  </body>
+</html>

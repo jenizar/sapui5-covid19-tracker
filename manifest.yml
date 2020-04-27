@@ -1,0 +1,5 @@
+---
+applications:
+- name: sapui5-covid19-tracker
+  buildpack: staticfile_buildpack
+  memory: 256M 
