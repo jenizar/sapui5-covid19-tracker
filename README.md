@@ -10,7 +10,7 @@
  
  3. cf push
  
- References
+ References:
  
  1. worldometers api : https://corona-stats.online?format=json
  
